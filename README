@@ -1,0 +1,49 @@
+SolrSearchable
+==============
+
+A Rails plugin to persist and search for ActiveRecord models in Apache Solr.
+
+
+Dependences
+===========
+
+- WillPaginate gem for pagination
+- RSolr : handles the actual communication with Solr
+
+Example
+=======
+
+Declare your model like:
+
+class Profile < ActiveRecord::Base
+
+  solr_searchable :fields => [
+    {:text => :first_name}, {:text => :last_name}, {:text => :bio},
+    {:string => :favorite_color}, {:integer => :age},
+    {:boolean => :likes_peanuts}
+  ]
+  
+end
+
+Index your models: 
+
+Profile.rebuild_solr_index
+
+Searching:
+
+clause = SolrSearchable::Clause.new(Profile)
+clause.and(:first_name => 'Cody', :last_name => 'Caughlan')
+clause.or(:age => 30)
+
+If you feel comfortable building your own query string by hand you can do that too - the query building Clause stuff is just
+to make it easy to build queries
+
+#=> Effectively generates the query: (first name is 'Cody AND last_name is Caughlan) OR (age is 30)
+
+results = Profile.paginate_by_solr(clause.to_s, :page => 1, :per_page => 10)
+
+or 
+
+results = Profile.find_by_solr(clause.to_s)
+
+Copyright (c) 2010 Cody Caughlan, released under the MIT license

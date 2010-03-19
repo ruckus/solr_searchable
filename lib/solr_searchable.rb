@@ -94,7 +94,7 @@ module SolrSearchable
       end
       
       #== ActiveRecord callback hooks
-      before_save :solr_save
+      after_save :solr_save
       before_destroy :solr_destroy
     end #solr_searchable
     

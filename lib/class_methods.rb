@@ -18,8 +18,11 @@ module SolrSearchable
       SolrSearchable::Handler::Select.new(query_options, self, environment_options).execute
     end
     
+    # Raw Solr query - dont invoke any ActiveRecord callbacks or load any models from the DB
+    # Returns the response from Solr as-is (Ruby style)
     def solr_query(query, options = {})
       query_options = generate_query_options(query, options)
+      activerecord_options = extract_activerecord_options(options)
       SolrSearchable::Handler::Select.new(query_options, self, {:format => :raw}).execute
     end
     
@@ -28,6 +31,11 @@ module SolrSearchable
       environment_options = solr_searchable_default_query_options.merge(options)
       result = SolrSearchable::Handler::Select.new(query_options, self, {:format => :raw}).execute
       result[:total_hits]
+    end
+    
+    def delete_by_query(query)
+      rsolr = SolrSearchable::IO.get_connection
+      rsolr.delete_by_query(query)
     end
     
     # this is a copy of WillPaginate#paginate specialized for "find_by_solr"
@@ -46,8 +54,7 @@ module SolrSearchable
           pager.total_entries = found[:total_hits]
           # Highlights?
           #pager.highlights = found.highlights if found.highlights
-          found = found[:docs]
-          pager.replace found
+          pager.replace found[:docs]
         rescue => ex
           return pager.replace([])
           Rails.logger.info("Search error: #{ex.message}")

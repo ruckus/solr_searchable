@@ -50,7 +50,6 @@ results = Profile.find_by_solr(clause.to_s)
 TODO
 ====
 
-+ add support for eager loading of ActiveRecord models
 + add support for boosting at index time
 
 Copyright (c) 2010 Cody Caughlan, released under the MIT license

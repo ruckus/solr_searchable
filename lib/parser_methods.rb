@@ -15,7 +15,10 @@ module SolrSearchable
     query_options[:rows] = (options[:limit] || solr_searchable_configuration[:limit])  
     if options[:fq]
       query_options[:fq].concat(options[:fq]) 
-    end
+    end    
+    if options[:order]
+      query_options[:sort] = options[:order]
+    end    
     query_options
   end # parse_query
   
